@@ -629,6 +629,29 @@
         </table>
       </div>
     </div>
+    <div class="card">
+      <div class="card-title green">Useful Snippet: Variables, Enums, Structs, Mappings, Modifier</div>
+      <div class="code-block">contract VariableTypesDemo {
+    uint256 public myUint = 100;
+    int256 public myInt = -100;
+    bool public myBool = true;
+    string public myString = "Hello, Solidity!";
+    address public myAddress = msg.sender;
+    bytes32 public myBytes32 = "SolidityBytes";
+
+    enum Status { Pending, Shipped, Delivered }
+    struct Person { string name; uint age; }
+
+    mapping(address =&gt; uint256) public balances;
+    uint256[] public numbers = [1, 2, 3, 4, 5];
+
+    modifier onlyOwner() {
+        require(msg.sender == myAddress, "Not the owner");
+        _;
+    }
+}</div>
+      <p style="margin-top:10px">This one example combines the most common Unit 3 building blocks in a single contract, so it is a very useful revision snippet.</p>
+    </div>
   </div>
 
   <!-- 3.4 Data Types -->
@@ -717,6 +740,23 @@
         <li>Can be <code>public</code> or <code>internal</code>; internal makes contract <strong>abstract</strong></li>
       </ul>
     </div>
+    <div class="card">
+      <div class="card-title green">Useful Snippet: Parent Constructor Initialization</div>
+      <div class="code-block">contract X {
+    string public name;
+    constructor(string memory _name) { name = _name; }
+}
+
+contract Y {
+    string public text;
+    constructor(string memory _text) { text = _text; }
+}
+
+contract C is X, Y {
+    constructor(string memory _name, string memory _text) X(_name) Y(_text) {}
+}</div>
+      <p style="margin-top:10px">This shows an important extension of the constructor idea: when contracts inherit from parent contracts, parent constructors must also be initialized properly.</p>
+    </div>
   </div>
 
   <!-- 3.6 Control Flow & Error Handling -->
@@ -762,6 +802,43 @@
         </ul>
         <div class="code-block" style="font-size:11px"><span class="kw">if</span>(_v &lt;= <span class="num">100</span>) <span class="fn">revert</span>(<span class="str">"Too small"</span>);</div>
       </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Conditional Statements</div>
+        <div class="code-block">function isGreaterThan10(uint256 num) public pure returns (string memory) {
+    if (num &gt; 10) return "Number is greater than 10";
+    return "Number is 10 or less";
+}
+
+function isSmallNumber(uint256 num) public pure returns (string memory) {
+    return (num &lt; 10) ? "Small Number" : "Big Number";
+}</div>
+      </div>
+      <div class="card">
+        <div class="card-title orange">break and continue</div>
+        <div class="code-block">function findFirstEven(uint256[] memory numbers) public pure returns (uint256) {
+    for (uint256 i = 0; i &lt; numbers.length; i++) {
+        if (numbers[i] % 2 == 0) return numbers[i];
+    }
+    return 0;
+}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title green">Useful Snippet: Custom Errors</div>
+      <div class="code-block">error InsufficientBalance(uint256 available, uint256 required);
+error UnauthorizedAccess(address caller);
+
+function withdraw(uint256 amount) public {
+    uint256 balance = balances[msg.sender];
+    if (balance &lt; amount) {
+        revert InsufficientBalance(balance, amount);
+    }
+    balances[msg.sender] -= amount;
+    payable(msg.sender).transfer(amount);
+}</div>
+      <p style="margin-top:10px">Custom errors are important because they are cleaner and more gas-efficient than long revert strings, especially in larger contracts.</p>
     </div>
   </div>
 
@@ -862,6 +939,33 @@
       </ul>
       <div class="code-block" style="margin-top:12px"><span class="kw">mapping</span>(<span class="kw">address</span> => <span class="kw">uint</span>) <span class="kw">public</span> balances;
 balances[msg.sender] += msg.value; <span class="cm">// add to mapping</span></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title green">Useful Snippet: Arrays</div>
+        <div class="code-block">uint256[5] public fixedArray = [1, 2, 3, 4, 5];
+uint256[] public dynamicArray;
+
+function addElement(uint256 _num) public {
+    dynamicArray.push(_num);
+}
+
+function removeLastElement() public {
+    require(dynamicArray.length &gt; 0, "Array is already empty");
+    dynamicArray.pop();
+}</div>
+      </div>
+      <div class="card">
+        <div class="card-title purple">Useful Snippet: Enums</div>
+        <div class="code-block">enum Status { Pending, Approved, Rejected, Shipped, Delivered }
+Status public orderStatus;
+
+function approveOrder() public { orderStatus = Status.Approved; }
+function shipOrder() public { orderStatus = Status.Shipped; }
+function getStatus() public view returns (uint256) {
+    return uint256(orderStatus);
+}</div>
+      </div>
     </div>
   </div>
 
@@ -1039,6 +1143,25 @@ balances[msg.sender] += msg.value; <span class="cm">// add to mapping</span></di
     owner = _newOwner;
 }</div>
     </div>
+    <div class="card">
+      <div class="card-title green">Useful Snippet: Visibility in Inheritance</div>
+      <div class="code-block">contract Parent {
+    uint public publicVar = 10;
+    uint internal internalVar = 20;
+    uint private privateVar = 30;
+
+    function getPrivateVar() public view returns (uint) {
+        return privateVar;
+    }
+}
+
+contract Child is Parent {
+    function accessParentVars() public view returns (uint, uint) {
+        return (publicVar, internalVar);
+    }
+}</div>
+      <p style="margin-top:10px">This helps remember visibility rules clearly: child contracts can use <code>public</code> and <code>internal</code>, but not <code>private</code>.</p>
+    </div>
   </div>
 
   <!-- 3.12 Ether Units -->
@@ -1066,6 +1189,66 @@ balances[msg.sender] += msg.value; <span class="cm">// add to mapping</span></di
     <div class="callout info">
       <span class="callout-icon">💡</span>
       <div><strong>Remember:</strong> The smallest unit is Wei. 1 Ether = 10¹⁸ Wei (1 quintillion Wei). Gas fees are typically quoted in <strong>Gwei</strong>.</div>
+    </div>
+  </div>
+
+  <!-- 3.13 Built-in Math & Crypto -->
+  <div id="u3-s13">
+    <div class="section-header">
+      <span class="section-number">3.13</span>
+      <h2 class="section-title u3">Built-in Mathematical &amp; Cryptographic Functions</h2>
+    </div>
+    <div class="card">
+      <div class="card-title">Why This Matters</div>
+      <p>Solidity includes built-in helpers for <strong>math, hashing, signature recovery, and block data access</strong>. These are important in commitments, authentication, verification, and protocol logic.</p>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Mathematical Built-ins</div>
+        <ul class="note-list">
+          <li><code>**</code> â€” exponentiation, e.g. <code>a ** b</code></li>
+          <li><code>addmod(x, y, k)</code> â€” computes <code>(x + y) % k</code> safely</li>
+          <li><code>mulmod(x, y, k)</code> â€” computes <code>(x * y) % k</code> safely</li>
+          <li>Useful in modular arithmetic and crypto-related calculations</li>
+        </ul>
+        <div class="code-block" style="margin-top:12px">function power(uint256 a, uint256 b) public pure returns (uint256) {
+    return a ** b;
+}
+
+function modularMath(uint256 x, uint256 y, uint256 k) public pure returns (uint256, uint256) {
+    return (addmod(x, y, k), mulmod(x, y, k));
+}</div>
+      </div>
+      <div class="card">
+        <div class="card-title orange">Cryptographic Built-ins</div>
+        <ul class="note-list orange">
+          <li><code>keccak256(...)</code> â€” Ethereum's primary hashing function</li>
+          <li><code>sha256(...)</code> â€” SHA-256 hashing</li>
+          <li><code>ripemd160(...)</code> â€” RIPEMD-160 hashing</li>
+          <li><code>ecrecover(hash, v, r, s)</code> â€” recovers signer address from a signature</li>
+          <li><code>blockhash(blockNumber)</code> â€” gets a recent block hash</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title green">Useful Snippet: Hashing &amp; Signature Verification</div>
+      <div class="code-block">function getHashes(string memory data) public pure returns (bytes32, bytes32, bytes20) {
+    bytes memory raw = bytes(data);
+    return (
+        keccak256(raw),
+        sha256(raw),
+        ripemd160(raw)
+    );
+}
+
+function recoverSigner(bytes32 hash, uint8 v, bytes32 r, bytes32 s) public pure returns (address) {
+    return ecrecover(hash, v, r, s);
+}</div>
+      <ul class="note-list green" style="margin-top:12px">
+        <li><strong>keccak256</strong> is used for commitments, Merkle proofs, and IDs</li>
+        <li><strong>ecrecover</strong> is used in signature-based authorization and meta-transactions</li>
+        <li><strong>blockhash</strong> should not be trusted for secure randomness in high-stakes logic</li>
+      </ul>
     </div>
   </div>
 
@@ -1366,6 +1549,29 @@ balances[msg.sender] += msg.value; <span class="cm">// add to mapping</span></di
           <li><strong>Load Balancing</strong> — Distribute traffic across multiple nodes</li>
           <li><strong>CDN</strong> — Offload traffic from primary infrastructure</li>
           <li><strong>Cloud-Based DDoS Protection</strong> — Absorb large-scale attacks</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Detailed DDoS Classification</div>
+        <ul class="note-list">
+          <li><strong>Network-Level Attacks:</strong> UDP flood, ICMP flood</li>
+          <li><strong>Transport/Server-Level Attacks:</strong> TCP SYN flood, SSL flood</li>
+          <li><strong>Application-Level Attacks:</strong> HTTP GET/POST flood, DNS query flood</li>
+          <li><strong>Blockchain-Specific Vectors:</strong> transaction spam, mempool flooding, resource exhaustion</li>
+          <li><strong>Consensus Mechanism Attacks:</strong> target block production or validator coordination to slow the chain</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title orange">Impact of DDoS on Blockchain</div>
+        <ul class="note-list orange">
+          <li><strong>Network Congestion:</strong> legitimate transactions wait longer</li>
+          <li><strong>Service Disruption:</strong> wallets, exchanges, nodes, and RPC APIs become unavailable</li>
+          <li><strong>Increased Costs:</strong> more fees and infrastructure expense</li>
+          <li><strong>Consensus Disruption:</strong> validators/miners may lag or miss blocks</li>
+          <li><strong>Security Exposure:</strong> stressed systems are easier to exploit</li>
+          <li><strong>Risk of Forks:</strong> delayed propagation can create inconsistent chain views</li>
         </ul>
       </div>
     </div>
@@ -1688,6 +1894,7 @@ balances[msg.sender] += msg.value; <span class="cm">// add to mapping</span></di
       <ul class="note-list">
         <li><strong>SOLO:</strong> Single node — for development only</li>
         <li><strong>Kafka:</strong> Crash fault tolerant consensus — minimum 3 nodes, odd number recommended</li>
+        <li><strong>Raft:</strong> Leader-based crash fault tolerant ordering widely used in modern Fabric networks</li>
       </ul>
     </div>
     <div class="card">
@@ -1700,6 +1907,27 @@ balances[msg.sender] += msg.value; <span class="cm">// add to mapping</span></di
         <li>Peers can participate in <strong>multiple channels</strong> simultaneously</li>
         <li>Enables concurrent execution for performance and scalability</li>
       </ul>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Identity, MSP, and Certificate Authorities</div>
+        <ul class="note-list">
+          <li><strong>MSP (Membership Service Provider):</strong> defines how identities are issued, validated, and trusted</li>
+          <li><strong>Fabric CA:</strong> default CA used to register and enroll users and nodes</li>
+          <li><strong>External CA:</strong> organizations can plug in their own PKI infrastructure</li>
+          <li><strong>LDAP Integration:</strong> allows enterprise-backed identity and authentication workflows</li>
+          <li>Each organization typically maintains its own local MSP and trust roots</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="card-title orange">Single-Channel vs Multi-Channel Networks</div>
+        <ul class="note-list orange">
+          <li><strong>Single-channel network:</strong> all participants share one ledger and one visibility scope</li>
+          <li><strong>Multi-channel network:</strong> different participant groups can maintain separate ledgers</li>
+          <li>Useful when business relationships require selective privacy</li>
+          <li>Improves confidentiality without building entirely separate blockchains</li>
+        </ul>
+      </div>
     </div>
     <div class="card">
       <div class="card-title green">Key Benefits of Hyperledger Fabric Transaction Flow</div>
@@ -1874,6 +2102,7 @@ const tocData = {
     {id:'u3-s10', label:'Events & Overloading'},
     {id:'u3-s11', label:'Withdrawal & Access'},
     {id:'u3-s12', label:'Ether Units'},
+    {id:'u3-s13', label:'Math & Crypto Built-ins'},
     {id:'u3-mcq', label:'📝 MCQs'},
   ],
   u4: [
